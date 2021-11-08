@@ -383,7 +383,7 @@ function run_rollbacks()
 
     while [ ${#rollback_stack[@]} -ge 1 ]; do
         ${rollback_stack[${#rollback_stack[@]}-1]} rollback;
-        unset rollback_stack[${#rollback_stack[@]}-1];
+        unset "rollback_stack[${#rollback_stack[@]}-1]";
     done
 
     clean_exit 1 "Rollback was run"
