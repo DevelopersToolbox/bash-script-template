@@ -7,5 +7,7 @@ This changelog was automatically generated using [Caretaker](https://github.com/
 
 ### [Unreleased](https://github.com/DevelopersToolbox/bash-script-template/commits/master)
 
-- first push [`[head]`](https://github.com/DevelopersToolbox/bash-script-template/commit/)
+- Update [`[head]`](https://github.com/DevelopersToolbox/bash-script-template/commit/)
+
+- first push [`[469b4fc]`](https://github.com/DevelopersToolbox/bash-script-template/commit/469b4fc674b6ed522a9c021c66cfad5eb721023e)
 

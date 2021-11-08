@@ -44,7 +44,7 @@ READONLY_INFO=true               # Set the script info to READONLY
 
 function wrapper()
 {
-    printf '%sI got here!!%s\n' "${green}" "${reset}"
+    printf '%sI got here!!%s\n' "${fgGreen}" "${reset}"
 }
 
 # -------------------------------------------------------------------------------- #
@@ -55,7 +55,7 @@ function wrapper()
 
 function usage()
 {
-    [[ -n "${*}" ]] && show_error "  Error: ${*}"
+    [[ -n "${*}" ]] && error "  Error: ${*}"
 
 cat <<EOF
   Usage: $0 [ -hdv ] [ -f ] [ -p value ]
@@ -81,7 +81,7 @@ function test_getopt
         if [[ "$(uname -s)" == "Darwin" ]]; then
             error "You are using MAcOS - please ensure you have installed gnu-getopt and updated your path."
         fi
-        abort
+        exit 1
     fi
 }
 
@@ -163,7 +163,7 @@ function process_arguments()
 # -------------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------------- #
-# Check Colours                                                                    #
+# Init Colours                                                                     #
 # -------------------------------------------------------------------------------- #
 # This function will check to see if we are able to support colours and how many   #
 # we are able to support.                                                          #
@@ -172,17 +172,17 @@ function process_arguments()
 # are less than 8 supported colours.                                               #
 #                                                                                  #
 # Variables intentionally not defined 'local' as we want them to be global.        #
-#                                                                                  #
-# NOTE: Do NOT use show_error for the error messages are it requires colour!       #
 # -------------------------------------------------------------------------------- #
 
-function check_colours()
+function init_colours()
 {
     local ncolors
 
-    red=''
-    yellow=''
-    green=''
+    fgRed=''
+    fgGreen=''
+    fgYellow=''
+    fgCyan=''
+    bold=''
     reset=''
 
     if [[ "${USE_COLOURS}" = false ]]; then
@@ -190,7 +190,11 @@ function check_colours()
     fi
 
     if ! test -t 1; then
-        return
+        if [[ "${FORCE_TERMINAL}" = true ]]; then
+            export TERM=xterm
+        else
+            return
+        fi
     fi
 
     if ! tput longname > /dev/null 2>&1; then
@@ -203,48 +207,91 @@ function check_colours()
         return
     fi
 
-    red=$(tput setaf 1)
-    yellow=$(tput setaf 3)
-    green=$(tput setaf 2)
+    fgRed=$(tput setaf 1)
+    fgGreen=$(tput setaf 2)
+    fgYellow=$(tput setaf 3)
+    fgCyan=$(tput setaf 6)
+
+    bold=$(tput bold)
     reset=$(tput sgr0)
 }
 
 # -------------------------------------------------------------------------------- #
-# Show Error                                                                       #
+# Error                                                                            #
 # -------------------------------------------------------------------------------- #
 # A simple wrapper function to show something was an error.                        #
 # -------------------------------------------------------------------------------- #
 
-function show_error()
+function error()
 {
-    if [[ -n $1 ]]; then
-        printf '%s%s%s\n' "${red}" "${*}" "${reset}" 1>&2
-    fi
+    notify 'error' "${@}"
 }
 
 # -------------------------------------------------------------------------------- #
-# Show Warning                                                                     #
+# Warning                                                                          #
 # -------------------------------------------------------------------------------- #
 # A simple wrapper function to show something was a warning.                       #
 # -------------------------------------------------------------------------------- #
 
-function show_warning()
+function warn()
 {
-    if [[ -n $1 ]]; then
-        printf '%s%s%s\n' "${yellow}" "${*}" "${reset}" 1>&2
-    fi
+    notify 'warning' "${@}"
 }
 
 # -------------------------------------------------------------------------------- #
-# Show Success                                                                     #
+# Success                                                                          #
 # -------------------------------------------------------------------------------- #
 # A simple wrapper function to show something was a success.                       #
 # -------------------------------------------------------------------------------- #
 
-function show_success()
+function success()
 {
-    if [[ -n $1 ]]; then
-        printf '%s%s%s\n' "${green}" "${*}" "${reset}" 1>&2
+    notify 'success' "${@}"
+}
+
+# -------------------------------------------------------------------------------- #
+# Info                                                                             #
+# -------------------------------------------------------------------------------- #
+# A simple wrapper function to show something is information.                      #
+# -------------------------------------------------------------------------------- #
+
+function info()
+{
+    notify 'info' "${@}"
+}
+
+# -------------------------------------------------------------------------------- #
+# Notify                                                                           #
+# -------------------------------------------------------------------------------- #
+# Handle all types of notification in one place.                                   #
+# -------------------------------------------------------------------------------- #
+
+function notify()
+{
+    local type="${1:-}"
+    shift
+    local message="${*:-}"
+    local fgColor
+
+    if [[ -n $message ]]; then
+        case "${type}" in
+            error)
+                fgColor="${fgRed}";
+                ;;
+            warning)
+                fgColor="${fgYellow}";
+                ;;
+            success)
+                fgColor="${fgGreen}";
+                ;;
+            info)
+                fgColor="${fgCyan}";
+                ;;
+            *)
+                fgColor='';
+                ;;
+        esac
+        printf '%s%b%s\n' "${fgColor}${bold}" "${message}" "${reset}" 1>&2
     fi
 }
 
@@ -262,13 +309,13 @@ function check_prereqs()
     do
         command=$(command -v "${i}" || true)
         if [[ -z $command ]]; then
-            show_error "$i is not in your command path"
+            error "$i is not in your command path"
             error_count=$((error_count+1))
         fi
     done
 
     if [[ $error_count -gt 0 ]]; then
-        show_error "$error_count errors located - fix before re-running";
+        error "$error_count errors located - fix before re-running";
         clean_exit 1;
     fi
 }
@@ -298,7 +345,7 @@ function clean_exit()
 
     if [[ -n ${2:-} ]];
     then
-        show_error "${2}"
+        error "${2}"
     fi
     exit "${1:-0}"
 }
@@ -441,7 +488,7 @@ function get_script_info()
 
 function main()
 {
-    check_colours
+    init_colours
 
     [[ "${STRICT_MODE}" = true ]] && set_strict_mode
 
