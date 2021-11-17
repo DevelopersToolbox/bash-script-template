@@ -7,7 +7,9 @@ This changelog was automatically generated using [Caretaker](https://github.com/
 
 ### [Unreleased](https://github.com/DevelopersToolbox/bash-script-template/commits/master)
 
-- Upgrade shellcheck [`[head]`](https://github.com/DevelopersToolbox/bash-script-template/commit/)
+- Add extra features [`[head]`](https://github.com/DevelopersToolbox/bash-script-template/commit/)
+
+- Upgrade shellcheck [`[5194a6a]`](https://github.com/DevelopersToolbox/bash-script-template/commit/5194a6a5b936d2afd89629ab01a0a84ae33c7e3c)
 
 - Update [`[03d7f93]`](https://github.com/DevelopersToolbox/bash-script-template/commit/03d7f938d90d17dcf417bfe234eb57668e9a2fd6)
 

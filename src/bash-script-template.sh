@@ -33,6 +33,8 @@ STRICT_MODE=true                 # Should we run in strict mode?
 VERBOSE=false                    # Should we give verbose output ?
 ZERO_INPUT=false                 # Do we require any user input ?
 USE_COLOURS=true                 # Should we use colours in our output ?
+FORCE_TERMINAL=true              # Force terminal type if requied
+TERMINAL_TYPE=xterm              # What terminal should we force?
 ROOT_ONLY=false                  # Should the script be run only by the root user ?
 READONLY_INFO=true               # Set the script info to READONLY
 
@@ -191,7 +193,7 @@ function init_colours()
 
     if ! test -t 1; then
         if [[ "${FORCE_TERMINAL}" = true ]]; then
-            export TERM=xterm
+            export TERM=${TERMINAL_TYPE}
         else
             return
         fi
@@ -296,6 +298,57 @@ function notify()
 }
 
 # -------------------------------------------------------------------------------- #
+# abs                                                                              #
+# -------------------------------------------------------------------------------- #
+# Return the absolute value for a given number.                                    #
+# -------------------------------------------------------------------------------- #
+
+function abs()
+{
+    (( $1 < 0 )) && echo "$(( $1 * -1 ))" || echo "$1"
+}
+
+# -------------------------------------------------------------------------------- #
+# Center Text                                                                      #
+# -------------------------------------------------------------------------------- #
+# A simple wrapper function to some text centered on the screen.                   #
+# -------------------------------------------------------------------------------- #
+
+function center_text()
+{
+    if [[ -n ${2:-} ]]; then
+        textsize=${2}
+        extra=$(abs "$(( textsize - ${#1} ))")
+    else
+        textsize=${#1}
+        extra=0
+    fi
+    span=$(( ( (WIDTH + textsize) / 2) + extra ))
+
+    printf '%*s\n' "${span}" "$1"
+}
+
+# -------------------------------------------------------------------------------- #
+# Draw Line                                                                        #
+# -------------------------------------------------------------------------------- #
+# A simple wrapper function to draw a line on the screen.                          #
+# -------------------------------------------------------------------------------- #
+
+function draw_line()
+{
+    if [[ "${NO_HEADERS}" = false ]]; then
+
+        local start=$'\e(0' end=$'\e(B' line='qqqqqqqqqqqqqqqq'
+
+        while ((${#line} < "${WIDTH}"));
+        do
+            line+="$line";
+        done
+        printf '%s%s%s\n' "$start" "${line:0:WIDTH}" "$end"
+    fi
+}
+
+# -------------------------------------------------------------------------------- #
 # Check Prerequisites                                                              #
 # -------------------------------------------------------------------------------- #
 # Check to ensure that the prerequisite commmands exist.                           #
@@ -309,7 +362,7 @@ function check_prereqs()
     do
         command=$(command -v "${i}" || true)
         if [[ -z $command ]]; then
-            error "$i is not in your command path"
+            warn "$i is not in your command path"
             error_count=$((error_count+1))
         fi
     done
@@ -328,9 +381,7 @@ function check_prereqs()
 
 function check_root()
 {
-    if [[ $EUID -ne 0 ]]; then
-        clean_exit 1 "This script must be run as root"
-    fi
+    [[ $EUID -ne 0 ]] && clean_exit 1 "This script must be run as root"
 }
 
 # -------------------------------------------------------------------------------- #
@@ -343,10 +394,7 @@ function clean_exit()
 {
     unset_traps
 
-    if [[ -n ${2:-} ]];
-    then
-        error "${2}"
-    fi
+    [[ -n ${2:-} ]] &&  error "${2}"
     exit "${1:-0}"
 }
 
@@ -377,9 +425,7 @@ function run_rollbacks()
 {
     unset_traps
 
-    if [[ "${VERBOSE}" = true ]]; then
-        printf '\nTrap Triggers - Running Rollbacks\n\n'
-    fi
+    [[ "${VERBOSE}" = true ]] && printf '\nTrap Triggers - Running Rollbacks\n\n'
 
     while [ ${#rollback_stack[@]} -ge 1 ]; do
         ${rollback_stack[${#rollback_stack[@]}-1]} rollback;
