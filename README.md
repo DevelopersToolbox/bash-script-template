@@ -3,7 +3,7 @@
         <img src="https://cdn.wolfsoftware.com/assets/images/github/organisations/developerstoolbox/black-and-white-circle-256.png" alt="DevelopersToolbox logo" />
     </a>
     <br />
-    <a href="https://github.com/DevelopersToolbox/bash-script-template/actions/workflows/pipeline.yml">
+    <a href="https://github.com/DevelopersToolbox/bash-script-template/actions/workflows/ci.yml">
         <img src="https://img.shields.io/github/workflow/status/DevelopersToolbox/bash-script-template/pipeline/master?style=for-the-badge" alt="Github Build Status">
     </a>
     <a href="https://github.com/DevelopersToolbox/bash-script-template/releases/latest">
