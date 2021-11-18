@@ -3,8 +3,8 @@
 # -------------------------------------------------------------------------------- #
 # Description                                                                      #
 # -------------------------------------------------------------------------------- #
-# This is a simple bash script wrapper designed to allow you to quickly put write  #
-# standard scrips in a standard way.                                               #
+# This is a simple bash script wrapper designed to allow you to quickly create     #
+# scripts in a standard way.                                                       #
 # -------------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------------- #
@@ -31,12 +31,14 @@ PREREQ_COMMANDS=( 'curl' )
 
 STRICT_MODE=true                 # Should we run in strict mode?
 VERBOSE=false                    # Should we give verbose output ?
-ZERO_INPUT=false                 # Do we require any user input ?
+ALLOW_ZERO_INPUT=false           # Do we require any user input ?
 USE_COLOURS=true                 # Should we use colours in our output ?
 FORCE_TERMINAL=true              # Force terminal type if requied
 TERMINAL_TYPE=xterm              # What terminal should we force?
 ROOT_ONLY=false                  # Should the script be run only by the root user ?
 READONLY_INFO=true               # Set the script info to READONLY
+DEFAULT_SCREEN_WIDTH=80          # Default width to use
+DYNAMIC_SCREEN_WIDTH=true        # Should we find the width dynamically?
 
 # -------------------------------------------------------------------------------- #
 # The wrapper function                                                             #
@@ -46,7 +48,7 @@ READONLY_INFO=true               # Set the script info to READONLY
 
 function wrapper()
 {
-    printf '%sI got here!!%s\n' "${fgGreen}" "${reset}"
+    echo "${fgGreen}I got here!!${reset}"
 }
 
 # -------------------------------------------------------------------------------- #
@@ -102,7 +104,7 @@ function process_arguments()
     local longopts
     local error_msg
 
-    if [[ "${ZERO_INPUT}" = false ]] && [[ $# -eq 0 ]]; then
+    if [[ "${ALLOW_ZERO_INPUT}" = false ]] && [[ $# -eq 0 ]]; then
         usage
     fi
 
@@ -186,6 +188,7 @@ function init_colours()
     fgCyan=''
     bold=''
     reset=''
+    screen_width=${DEFAULT_SCREEN_WIDTH}
 
     if [[ "${USE_COLOURS}" = false ]]; then
         return
@@ -216,6 +219,8 @@ function init_colours()
 
     bold=$(tput bold)
     reset=$(tput sgr0)
+
+    [[ "${DYNAMIC_SCREEN_WIDTH}" = true ]] && screen_width=$(tput cols)
 }
 
 # -------------------------------------------------------------------------------- #
@@ -294,57 +299,6 @@ function notify()
                 ;;
         esac
         printf '%s%b%s\n' "${fgColor}${bold}" "${message}" "${reset}" 1>&2
-    fi
-}
-
-# -------------------------------------------------------------------------------- #
-# abs                                                                              #
-# -------------------------------------------------------------------------------- #
-# Return the absolute value for a given number.                                    #
-# -------------------------------------------------------------------------------- #
-
-function abs()
-{
-    (( $1 < 0 )) && echo "$(( $1 * -1 ))" || echo "$1"
-}
-
-# -------------------------------------------------------------------------------- #
-# Center Text                                                                      #
-# -------------------------------------------------------------------------------- #
-# A simple wrapper function to some text centered on the screen.                   #
-# -------------------------------------------------------------------------------- #
-
-function center_text()
-{
-    if [[ -n ${2:-} ]]; then
-        textsize=${2}
-        extra=$(abs "$(( textsize - ${#1} ))")
-    else
-        textsize=${#1}
-        extra=0
-    fi
-    span=$(( ( (WIDTH + textsize) / 2) + extra ))
-
-    printf '%*s\n' "${span}" "$1"
-}
-
-# -------------------------------------------------------------------------------- #
-# Draw Line                                                                        #
-# -------------------------------------------------------------------------------- #
-# A simple wrapper function to draw a line on the screen.                          #
-# -------------------------------------------------------------------------------- #
-
-function draw_line()
-{
-    if [[ "${NO_HEADERS}" = false ]]; then
-
-        local start=$'\e(0' end=$'\e(B' line='qqqqqqqqqqqqqqqq'
-
-        while ((${#line} < "${WIDTH}"));
-        do
-            line+="$line";
-        done
-        printf '%s%s%s\n' "$start" "${line:0:WIDTH}" "$end"
     fi
 }
 
