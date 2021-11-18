@@ -9,6 +9,8 @@ This changelog was automatically generated using [Caretaker](https://github.com/
 
 - Add extra features [`[head]`](https://github.com/DevelopersToolbox/bash-script-template/commit/)
 
+- Add extra features [`[87f0783]`](https://github.com/DevelopersToolbox/bash-script-template/commit/87f07839e1230ea57bdac7534d8f75963d861e4d)
+
 - Add extra features [`[fc759d9]`](https://github.com/DevelopersToolbox/bash-script-template/commit/fc759d981aca848780b9c08ce59c56b2fb9101db)
 
 - Add extra features [`[442ec71]`](https://github.com/DevelopersToolbox/bash-script-template/commit/442ec71b5a89f35349da9654309d0f3a8d633d0e)

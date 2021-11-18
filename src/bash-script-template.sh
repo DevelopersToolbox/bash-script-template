@@ -37,8 +37,6 @@ FORCE_TERMINAL=true              # Force terminal type if requied
 TERMINAL_TYPE=xterm              # What terminal should we force?
 ROOT_ONLY=false                  # Should the script be run only by the root user ?
 READONLY_INFO=true               # Set the script info to READONLY
-DEFAULT_SCREEN_WIDTH=80          # Default width to use
-DYNAMIC_SCREEN_WIDTH=true        # Should we find the width dynamically?
 
 # -------------------------------------------------------------------------------- #
 # The wrapper function                                                             #
@@ -188,7 +186,6 @@ function init_colours()
     fgCyan=''
     bold=''
     reset=''
-    screen_width=${DEFAULT_SCREEN_WIDTH}
 
     if [[ "${USE_COLOURS}" = false ]]; then
         return
@@ -219,8 +216,6 @@ function init_colours()
 
     bold=$(tput bold)
     reset=$(tput sgr0)
-
-    [[ "${DYNAMIC_SCREEN_WIDTH}" = true ]] && screen_width=$(tput cols)
 }
 
 # -------------------------------------------------------------------------------- #
